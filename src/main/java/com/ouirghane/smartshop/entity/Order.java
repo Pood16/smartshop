@@ -1,0 +1,76 @@
+package com.ouirghane.smartshop.entity;
+
+
+import com.ouirghane.smartshop.enums.OrderStatus;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Fetch;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Table(name = "orders")
+public class Order extends BaseEntity{
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "client_id", nullable = false)
+    private Client client;
+
+    @Column(name = "order_date", nullable = false)
+    @Builder.Default
+    private LocalDateTime orderDate = LocalDateTime.now();
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal subtotal;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    @Builder.Default
+    private BigDecimal discountAmount = BigDecimal.ZERO;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal tvaAmount;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal totalAmount;
+
+    @Column(name = "promo_code")
+    private String promoCode;
+
+    @Column(name = "promo_active")
+    private boolean promoCodeUsed = false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private OrderStatus status = OrderStatus.PENDING;
+
+    @Column(name = "remaining_amount", nullable = false, precision = 10, scale = 2)
+    private BigDecimal remainingAmount;
+
+    @OneToMany(mappedBy = "order", fetch =  FetchType.LAZY)
+    private List<OrderItem> orderItems;
+
+    //todo: payment relationship = one to many, each order can have multiple payment methods
+
+
+    public boolean isFullyPaid(){
+        return remainingAmount.compareTo(BigDecimal.ZERO) == 0;
+    }
+
+    public boolean canBeConfirmed(){
+        return status == OrderStatus.VALID && isFullyPaid();
+    }
+
+
+
+
+}
