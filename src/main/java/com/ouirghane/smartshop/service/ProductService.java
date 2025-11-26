@@ -1,8 +1,11 @@
 package com.ouirghane.smartshop.service;
 
 import com.ouirghane.smartshop.dto.request.ProductCreateRequestDto;
+import com.ouirghane.smartshop.dto.request.ProductFilter;
 import com.ouirghane.smartshop.dto.request.ProductUpdateRequestDto;
 import com.ouirghane.smartshop.dto.response.ProductResponseDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -12,7 +15,7 @@ public interface ProductService {
     
     ProductResponseDto getProductById(Long id);
     
-    List<ProductResponseDto> getAllProducts();
+    Page<ProductResponseDto> getAllProducts(ProductFilter filter, Pageable page);
     
     ProductResponseDto updateProduct(Long id, ProductUpdateRequestDto request);
     

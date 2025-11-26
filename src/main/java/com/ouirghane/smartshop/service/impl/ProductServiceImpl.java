@@ -1,6 +1,7 @@
 package com.ouirghane.smartshop.service.impl;
 
 import com.ouirghane.smartshop.dto.request.ProductCreateRequestDto;
+import com.ouirghane.smartshop.dto.request.ProductFilter;
 import com.ouirghane.smartshop.dto.request.ProductUpdateRequestDto;
 import com.ouirghane.smartshop.dto.response.ProductResponseDto;
 import com.ouirghane.smartshop.entity.Product;
@@ -9,7 +10,11 @@ import com.ouirghane.smartshop.mapper.ProductMapper;
 import com.ouirghane.smartshop.repository.OrderItemRepository;
 import com.ouirghane.smartshop.repository.ProductRepository;
 import com.ouirghane.smartshop.service.ProductService;
+import com.ouirghane.smartshop.specifications.ProductSpecifications;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,11 +47,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ProductResponseDto> getAllProducts() {
-        return productRepository.findByDeletedFalse()
-                .stream()
-                .map(productMapper::toResponse)
-                .collect(Collectors.toList());
+    public Page<ProductResponseDto> getAllProducts(ProductFilter filter, Pageable pageable) {
+        Specification<Product> spec = ProductSpecifications.buildSpecification(filter);
+        return productRepository.findAll(spec, pageable).map(productMapper::toResponse);
     }
 
     @Override
