@@ -17,21 +17,5 @@ import java.util.Optional;
 
 @Repository
 public interface ClientRepository extends JpaRepository<Client, Long>, JpaSpecificationExecutor<Client> {
-
-    Optional<Client> findByUser(User user);
-    
-    Optional<Client> findByUserId(Long userId);
-    
-    Optional<Client> findByEmail(String email);
-    
     boolean existsByEmail(String email);
-    
-    Page<Client> findByClientLoyaltyLevel(ClientLoyaltyLevel level, Pageable pageable);
-    
-    List<Client> findTop10ByOrderByTotalSpentDesc();
-    
-    long countByClientLoyaltyLevel(ClientLoyaltyLevel level);
-    
-    @Query("SELECT c FROM Client c WHERE c.totalOrders >= :orders OR c.totalSpent >= :amount")
-    List<Client> findEligibleForLoyaltyUpgrade(@Param("orders") Integer orders, @Param("amount") BigDecimal amount);
 }

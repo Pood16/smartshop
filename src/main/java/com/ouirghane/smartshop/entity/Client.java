@@ -42,7 +42,7 @@ public class Client extends BaseEntity{
     @Column(name = "last_order_date")
     private LocalDateTime lastOrderDate;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id", unique = true)
     private User user;
 
