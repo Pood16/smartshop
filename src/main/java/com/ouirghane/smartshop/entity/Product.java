@@ -28,6 +28,7 @@ public class Product extends BaseEntity {
     private boolean deleted = false;
 
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    @Builder.Default
     private List<OrderItem> orderItems = new ArrayList<>();
 
 }

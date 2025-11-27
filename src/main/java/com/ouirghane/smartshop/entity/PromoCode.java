@@ -1,16 +1,14 @@
 package com.ouirghane.smartshop.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -22,23 +20,13 @@ public class PromoCode extends BaseEntity {
 
     @Column(nullable = false, precision = 5, scale = 2)
     @Builder.Default
-    private BigDecimal discountPercentage = new BigDecimal("5.00");
+    private BigDecimal discountPercentage = new BigDecimal("0.05");
 
     @Column(nullable = false)
     @Builder.Default
     private boolean active = true;
 
-    @Column(nullable = false)
-    @Builder.Default
-    private boolean singleUse = true;
-
-    @Column(name = "used_at")
-    private LocalDateTime usedAt;
-
-    @Column(name = "used_by_order_id")
-    private Long usedByOrderId;
-
     public boolean isUsable() {
-        return active && (!singleUse || usedAt == null);
+        return active;
     }
 }

@@ -4,13 +4,8 @@ package com.ouirghane.smartshop.service.impl;
 import com.ouirghane.smartshop.dto.request.ClientCreateRequestDto;
 import com.ouirghane.smartshop.dto.request.ClientUpdateRequestDto;
 import com.ouirghane.smartshop.dto.response.ClientResponseDto;
-import com.ouirghane.smartshop.dto.response.ClientSummaryDto;
-import com.ouirghane.smartshop.dto.response.ClientStatisticsDto;
-import com.ouirghane.smartshop.dto.response.ClientOrderHistoryDto;
 import com.ouirghane.smartshop.entity.Client;
-import com.ouirghane.smartshop.entity.Order;
 import com.ouirghane.smartshop.entity.User;
-import com.ouirghane.smartshop.enums.ClientLoyaltyLevel;
 import com.ouirghane.smartshop.enums.UserRole;
 import com.ouirghane.smartshop.exception.ResourceNotFoundException;
 import com.ouirghane.smartshop.exception.ValidationException;
@@ -21,15 +16,8 @@ import com.ouirghane.smartshop.repository.UserRepository;
 import com.ouirghane.smartshop.service.ClientService;
 import com.ouirghane.smartshop.util.PasswordUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
