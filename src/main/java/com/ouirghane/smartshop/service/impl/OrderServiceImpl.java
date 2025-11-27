@@ -13,6 +13,8 @@ import com.ouirghane.smartshop.mapper.OrderMapper;
 import com.ouirghane.smartshop.repository.*;
 import com.ouirghane.smartshop.service.OrderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -144,11 +146,31 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public OrderResponseDto getOrderById(Long id) {
-        return null;
+        Order order = orderRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Order Not Found"));
+        return orderMapper.toResponseDto(order);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Page<OrderResponseDto> getAllOrders(Pageable pageable) {
+        return orderRepository
+                .findAll(pageable)
+                .map(orderMapper::toResponseDto);
+    }
 
+    @Override
+    public void deleteOrder(Long id) {
+        Order order = orderRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("Order not Found"));
+        if (order.getStatus() == OrderStatus.CONFIRMED){
+            throw new ValidationException("You can't delete confirmed orders");
+        }
+        if (order.getRemainingAmount().compareTo(BigDecimal.ZERO) > 0){
+            throw new ValidationException("You can't Delete Orders with pending payments");
+        }
+        orderRepository.deleteById(id);
+    }
 
 
     private BigDecimal calculateLoyaltyDiscount(ClientLoyaltyLevel level, BigDecimal subtotal) {

@@ -4,13 +4,18 @@ package com.ouirghane.smartshop.controller;
 import com.ouirghane.smartshop.dto.request.OrderCreateRequestDto;
 import com.ouirghane.smartshop.dto.response.OrderResponseDto;
 import com.ouirghane.smartshop.service.OrderService;
+import com.ouirghane.smartshop.service.SessionService;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.repository.query.Param;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -20,13 +25,45 @@ public class OrderController {
 
 
     private final OrderService orderService;
+    private final SessionService sessionService;
 
 
     @PostMapping
     public ResponseEntity<OrderResponseDto> createOrder(@Valid
                                                         @RequestBody
-                                                        OrderCreateRequestDto requestDto){
+                                                        OrderCreateRequestDto requestDto,
+                                                        HttpSession session){
+        sessionService.validateAdminRole(session);
         OrderResponseDto response = orderService.createOrder(requestDto);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping
+    public ResponseEntity<Page<OrderResponseDto>> getAllOrders(
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "10") int size,
+            @RequestParam(required = false, defaultValue = "orderDate") String sortBy,
+            @RequestParam(required = false, defaultValue = "DESC") String direction,
+            @PageableDefault(size = 10, sort = "orderDate", direction = Sort.Direction.DESC, page = 0) Pageable pageable,
+            HttpSession session
+    ){
+        sessionService.validateAdminRole(session);
+        Page<OrderResponseDto> response = orderService.getAllOrders(pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<OrderResponseDto> getOrder(@PathVariable Long id, HttpSession session){
+        sessionService.validateAdminRole(session);
+        OrderResponseDto response = orderService.getOrderById(id);
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteOrder(@PathVariable Long id){
+        orderService.deleteOrder(id);
+        return ResponseEntity.noContent().build();
+    }
+
+
 }
