@@ -69,10 +69,7 @@ public class OrderServiceImpl implements OrderService {
                     .multiply(BigDecimal.valueOf(requestItem.getQuantity()))
                     .setScale(2, RoundingMode.HALF_UP);
             subtotal = subtotal.add(itemTotalAmount);
-            
-            product.setAvailableStock(product.getAvailableStock() - requestItem.getQuantity());
-            productRepository.save(product);
-            
+
             OrderItem orderItem = OrderItem
                     .builder()
                     .itemTotal(itemTotalAmount)
@@ -107,7 +104,7 @@ public class OrderServiceImpl implements OrderService {
                 .subtract(discountAmount)
                 .setScale(2, RoundingMode.HALF_UP);
 
-        Double tvaPercentage = requestDto.getTvaPercentage() != null ? requestDto.getTvaPercentage() : 20.00;
+        double tvaPercentage = requestDto.getTvaPercentage() != null ? requestDto.getTvaPercentage() : 20.00;
         BigDecimal tvaAmount = totalAfterDiscount
                 .multiply(BigDecimal.valueOf(tvaPercentage / 100))
                 .setScale(2, RoundingMode.HALF_UP);
@@ -133,14 +130,6 @@ public class OrderServiceImpl implements OrderService {
         }
         
         Order savedOrder = orderRepository.save(order);
-        
-        client.setTotalOrders(client.getTotalOrders() + 1);
-        client.setTotalSpent(client.getTotalSpent().add(totalAmount));
-        if (client.getFirstOrderDate() == null) {
-            client.setFirstOrderDate(LocalDateTime.now());
-        }
-        client.setLastOrderDate(LocalDateTime.now());
-        clientRepository.save(client);
 
         return orderMapper.toResponseDto(savedOrder);
     }
