@@ -65,5 +65,13 @@ public class OrderController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/me/history")
+    public ResponseEntity<Page<OrderResponseDto>> myOrders(
+            HttpSession session,
+            @PageableDefault(size = 1, sort = "orderDate", direction = Sort.Direction.DESC) Pageable pageable){
+        Page<OrderResponseDto> response = orderService.orderHistorique(sessionService.getAuthenticatedUserId(session) ,pageable);
+        return ResponseEntity.ok(response);
+    }
+
 
 }

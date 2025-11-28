@@ -172,6 +172,15 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.deleteById(id);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Page<OrderResponseDto> orderHistorique(Long userId, Pageable pageable) {
+        Client client = clientRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Client not Found"));
+        return orderRepository.findByClientId(client.getId(), pageable)
+                .map(orderMapper::toResponseDto);
+    }
+
 
     private BigDecimal calculateLoyaltyDiscount(ClientLoyaltyLevel level, BigDecimal subtotal) {
          BigDecimal discount = BigDecimal.ZERO;
