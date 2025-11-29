@@ -3,18 +3,14 @@ package com.ouirghane.smartshop.entity;
 
 import com.ouirghane.smartshop.enums.OrderStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Fetch;
-
+import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -36,17 +32,19 @@ public class Order extends BaseEntity{
     @Builder.Default
     private BigDecimal discountAmount = BigDecimal.ZERO;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Column(name = "tva_amount", nullable = false, precision = 10, scale = 2)
     private BigDecimal tvaAmount;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Builder.Default
+    @Column(name = "tva_percentage", nullable = false)
+    private Double tvaPercentage = 20.00;
+
+    @Column(name = "total_amount", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalAmount;
 
-    @Column(name = "promo_code")
-    private String promoCode;
 
-    @Column(name = "promo_active")
-    private boolean promoCodeUsed = false;
+    @JoinColumn(name = "promo_code")
+    private String promoCode;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -56,18 +54,19 @@ public class Order extends BaseEntity{
     @Column(name = "remaining_amount", nullable = false, precision = 10, scale = 2)
     private BigDecimal remainingAmount;
 
-    @OneToMany(mappedBy = "order", fetch =  FetchType.LAZY)
+    @OneToMany(mappedBy = "order", fetch =  FetchType.LAZY, cascade = CascadeType.ALL)
     private List<OrderItem> orderItems;
 
-    //todo: payment relationship = one to many, each order can have multiple payment methods
 
+    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Payment> payments;
 
     public boolean isFullyPaid(){
         return remainingAmount.compareTo(BigDecimal.ZERO) == 0;
     }
 
     public boolean canBeConfirmed(){
-        return status == OrderStatus.VALID && isFullyPaid();
+        return status == OrderStatus.PENDING && isFullyPaid();
     }
 
 

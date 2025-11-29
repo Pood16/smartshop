@@ -1,8 +1,7 @@
 package com.ouirghane.smartshop.enums;
 
-public enum OrderStatus {
+public enum PaymentStatus {
     PENDING,
-    CONFIRMED,
-    CANCELED,
+    COLLECTED,
     REJECTED
 }

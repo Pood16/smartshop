@@ -1,18 +1,18 @@
 package com.ouirghane.smartshop.entity;
 
 
+import com.ouirghane.smartshop.enums.PaymentStatus;
 import com.ouirghane.smartshop.enums.PaymentType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -23,22 +23,21 @@ public class Payment extends BaseEntity {
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
-    @Column(nullable = false)
+    @Column(name = "payment_number", nullable = false)
     private Integer paymentNumber;
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal amount;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "payment_type", nullable = false)
     private PaymentType paymentType;
 
-    @Column(nullable = false)
+    @Column(name = "payment_date", nullable = false)
     private LocalDateTime paymentDate;
 
     @Column(name = "collection_date")
     private LocalDateTime collectionDate;
-
 
     @Column(name = "reference_number")
     private String referenceNumber;
@@ -46,9 +45,10 @@ public class Payment extends BaseEntity {
     @Column(name = "bank_name")
     private String bankName;
 
-    @Column(name = "due_date")
-    private LocalDate dueDate;
-
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private PaymentStatus status = PaymentStatus.PENDING;
 
     public boolean isCashAmountValid() {
         if (paymentType == PaymentType.CASH) {
@@ -59,7 +59,7 @@ public class Payment extends BaseEntity {
 
     public boolean isCheckPaymentValid() {
         if (paymentType == PaymentType.CHECK) {
-            return bankName != null && !bankName.trim().isEmpty() && dueDate != null;
+            return bankName != null && !bankName.trim().isEmpty();
         }
         return true;
     }

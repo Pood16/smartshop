@@ -3,15 +3,15 @@ package com.ouirghane.smartshop.entity;
 
 import com.ouirghane.smartshop.enums.ClientLoyaltyLevel;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -23,15 +23,24 @@ public class Client extends BaseEntity{
     private String email;
 
     @Enumerated(EnumType.STRING)
-    private ClientLoyaltyLevel clientLoyaltyLevel;
+    @Builder.Default
+    private ClientLoyaltyLevel clientLoyaltyLevel = ClientLoyaltyLevel.BASIC;
 
-    /*
-    * What is the relationship between user and client?
-    * How the users are created
-    * How to handle authentication if no relation between user and client
-    **/
+    @Column(name = "total_orders")
+    @Builder.Default
+    private Integer totalOrders = 0;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @Column(name = "total_spent", precision = 10, scale = 2)
+    @Builder.Default
+    private BigDecimal totalSpent = BigDecimal.ZERO;
+
+    @Column(name = "first_order_date")
+    private LocalDateTime firstOrderDate;
+
+    @Column(name = "last_order_date")
+    private LocalDateTime lastOrderDate;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id", unique = true)
     private User user;
 
