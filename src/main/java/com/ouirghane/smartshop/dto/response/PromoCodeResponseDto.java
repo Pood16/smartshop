@@ -6,15 +6,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class OrderItemResponseDto {
+public class PromoCodeResponseDto {
 
     private Long id;
-    private ProductResponseDto product;
-    private Integer quantity;
-    private BigDecimal itemTotalAmount;
+    private String code;
+    private BigDecimal discountPercentage;
+    private boolean active;
 }

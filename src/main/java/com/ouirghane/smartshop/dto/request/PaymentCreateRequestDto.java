@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -26,5 +27,5 @@ public class PaymentCreateRequestDto {
 
     private String referenceNumber;
     private String bankName;
-    private LocalDate dueDate;
+    private LocalDateTime collectionDate;
 }

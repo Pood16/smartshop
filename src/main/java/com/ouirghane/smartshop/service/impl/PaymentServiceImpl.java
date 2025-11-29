@@ -18,6 +18,8 @@ import com.ouirghane.smartshop.repository.PaymentRepository;
 import com.ouirghane.smartshop.repository.ProductRepository;
 import com.ouirghane.smartshop.service.PaymentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,27 +66,77 @@ public class PaymentServiceImpl implements PaymentService {
         if (payment.getPaymentType() == PaymentType.CASH) {
             payment.setStatus(PaymentStatus.COLLECTED);
             payment.setCollectionDate(LocalDateTime.now());
-        } else {
+            BigDecimal newRemaining = order.getRemainingAmount().subtract(requestDto.getAmount());
+            order.setRemainingAmount(newRemaining);
+            orderRepository.save(order);
+        }else {
             payment.setStatus(PaymentStatus.PENDING);
         }
 
-
-        if (paymentRepository.countByOrderId(orderId) == 0){
-            List<OrderItem> orderItems = order.getOrderItems();
-            for (OrderItem item: orderItems){
-                Product product = item.getProduct();
-                product.setAvailableStock(product.getAvailableStock() - item.getQuantity());
-                productRepository.save(product);
-            }
-        }
         payment.setOrder(order);
         Payment savedPayment = paymentRepository.save(payment);
 
-        BigDecimal newRemaining = order.getRemainingAmount().subtract(requestDto.getAmount());
+        return paymentMapper.toResponseDto(savedPayment);
+    }
+
+
+    @Override
+    @Transactional
+    public PaymentResponseDto collectPayment(Long paymentId) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Payment not found"));
+
+        Order order = payment.getOrder();
+
+        if (payment.getOrder().getStatus() == OrderStatus.CONFIRMED) {
+            throw new ValidationException("Cannot modify payment for confirmed order");
+        }
+
+        if (payment.getStatus() == PaymentStatus.COLLECTED) {
+            throw new ValidationException("Payment is already collected");
+        }
+
+        payment.setStatus(PaymentStatus.COLLECTED);
+        payment.setCollectionDate(LocalDateTime.now());
+
+        BigDecimal newRemaining = order.getRemainingAmount().subtract(payment.getAmount());
         order.setRemainingAmount(newRemaining);
         orderRepository.save(order);
 
-        return paymentMapper.toResponseDto(savedPayment);
+        Payment updatedPayment = paymentRepository.save(payment);
+        return paymentMapper.toResponseDto(updatedPayment);
+    }
+
+    @Override
+    @Transactional
+    public PaymentResponseDto rejectPayment(Long paymentId) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Payment not found"));
+
+        if (payment.getOrder().getStatus() == OrderStatus.CONFIRMED) {
+            throw new ValidationException("Cannot modify payment for confirmed order");
+        }
+
+        if (payment.getPaymentType() == PaymentType.CASH) {
+            throw new ValidationException("Cash payments cannot be rejected");
+        }
+
+        payment.setStatus(PaymentStatus.REJECTED);
+
+        Payment updatedPayment = paymentRepository.save(payment);
+        return paymentMapper.toResponseDto(updatedPayment);
+    }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<PaymentResponseDto> getAllPaymentsByOrderId(Long orderId, Pageable pageable){
+        if (!orderRepository.existsById(orderId)) {
+            throw new ResourceNotFoundException("Order not found with id: " + orderId);
+        }
+        
+        return paymentRepository.findPaymentsByOrderId(orderId, pageable)
+                .map(paymentMapper::toResponseDto);
     }
 
     private void validatePaymentTypeRules(Payment payment, PaymentCreateRequestDto dto) {
@@ -95,7 +147,7 @@ public class PaymentServiceImpl implements PaymentService {
                 }
                 break;
             case CHECK:
-                if (dto.getBankName() == null || dto.getDueDate() == null) {
+                if (dto.getBankName() == null) {
                     throw new ValidationException("Check payment requires bank name and due date");
                 }
                 break;

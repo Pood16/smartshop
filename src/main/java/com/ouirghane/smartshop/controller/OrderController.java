@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,7 +36,7 @@ public class OrderController {
                                                         HttpSession session){
         sessionService.validateAdminRole(session);
         OrderResponseDto response = orderService.createOrder(requestDto);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping
@@ -60,7 +61,8 @@ public class OrderController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteOrder(@PathVariable Long id){
+    public ResponseEntity<Void> deleteOrder(@PathVariable Long id, HttpSession session){
+        sessionService.validateAdminRole(session);
         orderService.deleteOrder(id);
         return ResponseEntity.noContent().build();
     }
@@ -73,4 +75,21 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
+    @PatchMapping("/{id}/confirm")
+    public ResponseEntity<OrderResponseDto> confirmOrder(
+            @PathVariable Long id,
+            HttpSession session){
+        sessionService.validateAdminRole(session);
+        OrderResponseDto response = orderService.confirmOrder(id);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{id}/cancel")
+    public ResponseEntity<OrderResponseDto> cancelOrder(
+            @PathVariable Long id,
+            HttpSession session){
+        sessionService.validateAdminRole(session);
+        OrderResponseDto response = orderService.cancelOrder(id);
+        return ResponseEntity.ok(response);
+    }
 }

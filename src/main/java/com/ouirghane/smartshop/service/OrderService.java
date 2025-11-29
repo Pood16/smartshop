@@ -16,5 +16,8 @@ public interface OrderService {
     void deleteOrder(Long id);
 
     Page<OrderResponseDto> orderHistorique(Long clientId, Pageable pageable);
-
+    
+    OrderResponseDto confirmOrder(Long orderId);
+    
+    OrderResponseDto cancelOrder(Long orderId);
 }

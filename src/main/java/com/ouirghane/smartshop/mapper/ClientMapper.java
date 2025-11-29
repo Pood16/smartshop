@@ -3,6 +3,7 @@ package com.ouirghane.smartshop.mapper;
 
 import com.ouirghane.smartshop.dto.request.ClientCreateRequestDto;
 import com.ouirghane.smartshop.dto.request.ClientUpdateRequestDto;
+import com.ouirghane.smartshop.dto.response.ClientMinimalInformationsDto;
 import com.ouirghane.smartshop.dto.response.ClientResponseDto;
 import com.ouirghane.smartshop.entity.Client;
 import com.ouirghane.smartshop.entity.User;

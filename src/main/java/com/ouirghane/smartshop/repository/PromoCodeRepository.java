@@ -17,11 +17,6 @@ public interface PromoCodeRepository extends JpaRepository<PromoCode, Long>, Jpa
     
     boolean existsByCode(String code);
     
-//    Page<PromoCode> findByActiveTrue(Pageable pageable);
-//
-//    List<PromoCode> findByUsedAtIsNull();
-//
-//    List<PromoCode> findByUsedAtIsNotNull();
-//
-//    List<PromoCode> findBySingleUseAndUsedAtIsNull(boolean singleUse);
+    Page<PromoCode> findByActiveTrue(Pageable pageable);
+
 }

@@ -7,6 +7,7 @@ import com.ouirghane.smartshop.dto.response.OrderResponseDto;
 import com.ouirghane.smartshop.entity.*;
 import com.ouirghane.smartshop.enums.ClientLoyaltyLevel;
 import com.ouirghane.smartshop.enums.OrderStatus;
+import com.ouirghane.smartshop.enums.PaymentStatus;
 import com.ouirghane.smartshop.exception.ResourceNotFoundException;
 import com.ouirghane.smartshop.exception.ValidationException;
 import com.ouirghane.smartshop.mapper.OrderMapper;
@@ -129,6 +130,13 @@ public class OrderServiceImpl implements OrderService {
             item.setOrder(order);
         }
         
+        // Reserve stock immediately when order is created
+        for (OrderItem item : items) {
+            Product product = item.getProduct();
+            product.setAvailableStock(product.getAvailableStock() - item.getQuantity());
+            productRepository.save(product);
+        }
+        
         Order savedOrder = orderRepository.save(order);
 
         return orderMapper.toResponseDto(savedOrder);
@@ -170,6 +178,80 @@ public class OrderServiceImpl implements OrderService {
                 .map(orderMapper::toResponseDto);
     }
 
+
+    @Override
+    @Transactional
+    public OrderResponseDto confirmOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+
+        if (!order.canBeConfirmed()) {
+            throw new ValidationException("Order cannot be confirmed. Must be PENDING and fully paid.");
+        }
+
+
+        
+
+        Client client = order.getClient();
+        client.setTotalOrders(client.getTotalOrders() + 1);
+        client.setTotalSpent(client.getTotalSpent().add(order.getTotalAmount()));
+
+        if (client.getFirstOrderDate() == null) {
+            client.setFirstOrderDate(LocalDateTime.now());
+        }
+        client.setLastOrderDate(LocalDateTime.now());
+
+
+        updateClientLoyaltyLevel(client);
+        clientRepository.save(client);
+
+
+        order.setStatus(OrderStatus.CONFIRMED);
+        Order savedOrder = orderRepository.save(order);
+
+        return orderMapper.toResponseDto(savedOrder);
+    }
+
+    @Override
+    @Transactional
+    public OrderResponseDto cancelOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+
+        if (order.getStatus() != OrderStatus.PENDING) {
+            throw new ValidationException("Only PENDING orders can be canceled");
+        }
+
+        if (!order.getPayments().isEmpty()){
+            for (Payment orderPayment: order.getPayments()){
+                if (orderPayment.getStatus() == PaymentStatus.COLLECTED){
+                    throw new ValidationException("You can't delete Orders with collected payments");
+                }
+            }
+        }
+
+
+        for (OrderItem item : order.getOrderItems()) {
+            Product product = item.getProduct();
+            product.setAvailableStock(product.getAvailableStock() + item.getQuantity());
+            productRepository.save(product);
+        }
+
+        order.setStatus(OrderStatus.CANCELED);
+        Order savedOrder = orderRepository.save(order);
+
+        return orderMapper.toResponseDto(savedOrder);
+    }
+
+    private void updateClientLoyaltyLevel(Client client) {
+        if (client.getTotalOrders() >= 20 || client.getTotalSpent().compareTo(new BigDecimal("15000")) >= 0) {
+            client.setClientLoyaltyLevel(ClientLoyaltyLevel.PLATINUM);
+        } else if (client.getTotalOrders() >= 10 || client.getTotalSpent().compareTo(new BigDecimal("5000")) >= 0) {
+            client.setClientLoyaltyLevel(ClientLoyaltyLevel.GOLD);
+        } else if (client.getTotalOrders() >= 3 || client.getTotalSpent().compareTo(new BigDecimal("1000")) >= 0) {
+            client.setClientLoyaltyLevel(ClientLoyaltyLevel.SILVER);
+        }
+    }
 
     private BigDecimal calculateLoyaltyDiscount(ClientLoyaltyLevel level, BigDecimal subtotal) {
          BigDecimal discount = BigDecimal.ZERO;
