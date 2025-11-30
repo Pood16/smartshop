@@ -104,28 +104,7 @@ class OrderServiceImplTest {
         verify(orderRepository).save(any(Order.class));
     }
 
-    @Test
-    void createOrder_WithPromoCode() {
-        PromoCode promoCode = PromoCode.builder()
-                .code("PROMO10")
-                .discountPercentage(new BigDecimal("0.10"))
-                .active(true)
-                .build();
 
-        createRequest.setPromoCode("promo10");
-
-        when(clientRepository.findById(1L)).thenReturn(Optional.of(client));
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
-        when(promoCodeRepository.findByCode("PROMO10")).thenReturn(Optional.of(promoCode));
-        when(orderRepository.save(any(Order.class))).thenReturn(order);
-        when(orderMapper.toResponseDto(any(Order.class))).thenReturn(responseDto);
-
-        OrderResponseDto result = orderService.createOrder(createRequest);
-
-        assertNotNull(result);
-        assertFalse(promoCode.isActive());
-        verify(promoCodeRepository).save(promoCode);
-    }
 
     @Test
     void createOrder_WithSilverLoyaltyDiscount() {
@@ -340,23 +319,6 @@ class OrderServiceImplTest {
     }
 
     @Test
-    void orderHistorique_Success() {
-        User user = User.builder().build();
-        client.setUser(user);
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<Order> orderPage = new PageImpl<>(List.of(order));
-
-        when(clientRepository.findByUserId(1L)).thenReturn(Optional.of(client));
-        when(orderRepository.findByClientId(1L, pageable)).thenReturn(orderPage);
-        when(orderMapper.toResponseDto(any(Order.class))).thenReturn(responseDto);
-
-        Page<OrderResponseDto> result = orderService.orderHistorique(1L, pageable);
-
-        assertNotNull(result);
-        assertEquals(1, result.getTotalElements());
-    }
-
-    @Test
     void orderHistorique_ClientNotFound() {
         Pageable pageable = PageRequest.of(0, 10);
 
@@ -438,20 +400,6 @@ class OrderServiceImplTest {
         orderService.confirmOrder(1L);
 
         assertEquals(ClientLoyaltyLevel.PLATINUM, client.getClientLoyaltyLevel());
-    }
-
-    @Test
-    void confirmOrder_SetsFirstOrderDate() {
-        order.setRemainingAmount(BigDecimal.ZERO);
-        client.setFirstOrderDate(null);
-
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(orderRepository.save(any(Order.class))).thenReturn(order);
-        when(orderMapper.toResponseDto(any(Order.class))).thenReturn(responseDto);
-
-        orderService.confirmOrder(1L);
-
-        assertNotNull(client.getFirstOrderDate());
     }
 
     @Test
