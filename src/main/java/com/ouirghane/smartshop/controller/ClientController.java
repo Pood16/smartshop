@@ -3,6 +3,7 @@ package com.ouirghane.smartshop.controller;
 
 import com.ouirghane.smartshop.dto.request.ClientCreateRequestDto;
 import com.ouirghane.smartshop.dto.request.ClientUpdateRequestDto;
+import com.ouirghane.smartshop.dto.response.ClientMinimalInformationsDto;
 import com.ouirghane.smartshop.dto.response.ClientResponseDto;
 import com.ouirghane.smartshop.entity.Client;
 import com.ouirghane.smartshop.entity.User;
@@ -26,13 +27,13 @@ public class ClientController {
     private final ClientService clientService;
 
     @PostMapping
-    public ResponseEntity<ClientResponseDto> createClient(
+    public ResponseEntity<ClientMinimalInformationsDto> createClient(
             @Valid
             @RequestBody
             ClientCreateRequestDto request,
             HttpSession session) {
         sessionService.validateAdminRole(session);
-        ClientResponseDto response = clientService.createClient(request);
+        ClientMinimalInformationsDto response = clientService.createClient(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

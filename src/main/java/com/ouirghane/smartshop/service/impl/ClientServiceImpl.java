@@ -3,6 +3,7 @@ package com.ouirghane.smartshop.service.impl;
 
 import com.ouirghane.smartshop.dto.request.ClientCreateRequestDto;
 import com.ouirghane.smartshop.dto.request.ClientUpdateRequestDto;
+import com.ouirghane.smartshop.dto.response.ClientMinimalInformationsDto;
 import com.ouirghane.smartshop.dto.response.ClientResponseDto;
 import com.ouirghane.smartshop.entity.Client;
 import com.ouirghane.smartshop.entity.User;
@@ -31,7 +32,7 @@ public class ClientServiceImpl implements ClientService {
     private final PasswordUtil passwordUtil;
 
     @Override
-    public ClientResponseDto createClient(ClientCreateRequestDto requestDto){
+    public ClientMinimalInformationsDto createClient(ClientCreateRequestDto requestDto){
         if (userRepository.existsByUsername(requestDto.getUsername())){
             throw new ValidationException("Username already exists");
         }
@@ -51,7 +52,7 @@ public class ClientServiceImpl implements ClientService {
         Client client = clientMapper.toEntity(requestDto, user);
         Client savedClient = clientRepository.save(client);
 
-        return clientMapper.toResponseDto(savedClient);
+        return clientMapper.toClientMinimalistInformations(savedClient);
     }
 
     @Override
