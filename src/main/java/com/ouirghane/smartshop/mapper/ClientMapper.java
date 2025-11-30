@@ -25,6 +25,7 @@ public interface ClientMapper {
     Client toEntity(ClientCreateRequestDto requestDTO, User user);
 
     ClientResponseDto toResponseDto(Client client);
+    ClientMinimalInformationsDto toClientMinimalistInformations(Client client);
 
     @Mappings({
             @Mapping(target = "id", ignore = true),

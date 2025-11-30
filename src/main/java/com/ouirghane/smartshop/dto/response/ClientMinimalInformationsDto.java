@@ -1,5 +1,6 @@
 package com.ouirghane.smartshop.dto.response;
 
+import com.ouirghane.smartshop.enums.ClientLoyaltyLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,4 +15,5 @@ public class ClientMinimalInformationsDto {
     private Long id;
     private String name;
     private String email;
+    private ClientLoyaltyLevel clientLoyaltyLevel;
 }
