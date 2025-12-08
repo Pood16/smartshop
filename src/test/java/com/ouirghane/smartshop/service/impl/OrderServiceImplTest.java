@@ -23,7 +23,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -322,9 +321,9 @@ class OrderServiceImplTest {
     void orderHistorique_ClientNotFound() {
         Pageable pageable = PageRequest.of(0, 10);
 
-        when(clientRepository.findByUserId(1L)).thenReturn(Optional.empty());
+        when(clientRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> orderService.orderHistorique(1L, pageable));
+        assertThrows(ResourceNotFoundException.class, () -> orderService.getOrdersByClient(1L, pageable));
     }
 
     @Test

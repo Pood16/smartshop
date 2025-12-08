@@ -7,7 +7,9 @@ import com.ouirghane.smartshop.dto.response.ClientMinimalInformationsDto;
 import com.ouirghane.smartshop.dto.response.ClientResponseDto;
 import com.ouirghane.smartshop.entity.Client;
 import com.ouirghane.smartshop.entity.User;
+import com.ouirghane.smartshop.enums.OrderStatus;
 import com.ouirghane.smartshop.enums.UserRole;
+import com.ouirghane.smartshop.exception.BusinessException;
 import com.ouirghane.smartshop.exception.ResourceNotFoundException;
 import com.ouirghane.smartshop.exception.ValidationException;
 import com.ouirghane.smartshop.mapper.ClientMapper;
@@ -17,6 +19,8 @@ import com.ouirghane.smartshop.repository.UserRepository;
 import com.ouirghane.smartshop.service.ClientService;
 import com.ouirghane.smartshop.util.PasswordUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,6 +68,11 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
+    public Client getClientByUserId(Long id) {
+        return clientRepository.findByUserId(id).orElseThrow(()->new ResourceNotFoundException("Client not found"));
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public ClientResponseDto getClientProfile(Long clientId) {
         Client client = clientRepository.findById(clientId)
@@ -99,6 +108,14 @@ public class ClientServiceImpl implements ClientService {
         if (!clientRepository.existsById(id)) {
             throw new ResourceNotFoundException("Client not found");
         }
+        if (orderRepository.existsByClientIdAndStatus(id, OrderStatus.PENDING)){
+            throw new BusinessException("You can not delete client with active orders");
+        }
         clientRepository.deleteById(id);
+    }
+
+    @Override
+    public Page<ClientResponseDto> getAllClients(Pageable pageable){
+        return clientRepository.findAll(pageable).map(clientMapper::toResponseDto);
     }
 }

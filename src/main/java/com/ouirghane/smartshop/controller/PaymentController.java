@@ -57,7 +57,7 @@ public class PaymentController {
     @GetMapping("/order/{orderId}")
     public ResponseEntity<Page<PaymentResponseDto>> getAllPaymentsByOrderId(
             @PathVariable Long orderId,
-            @PageableDefault(size = 10, sort = "paymentDate") Pageable pageable,
+            @PageableDefault(sort = "paymentDate") Pageable pageable,
             HttpSession session){
         sessionService.validateAdminRole(session);
         Page<PaymentResponseDto> response = paymentService.getAllPaymentsByOrderId(orderId, pageable);

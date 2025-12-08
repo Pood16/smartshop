@@ -5,6 +5,8 @@ import com.ouirghane.smartshop.dto.response.OrderResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.math.BigDecimal;
+
 public interface OrderService {
 
     OrderResponseDto createOrder(OrderCreateRequestDto requestDto);
@@ -15,9 +17,11 @@ public interface OrderService {
 
     void deleteOrder(Long id);
 
-    Page<OrderResponseDto> orderHistorique(Long clientId, Pageable pageable);
+    Page<OrderResponseDto> getOrdersByClient(Long clientId, Pageable pageable);
     
     OrderResponseDto confirmOrder(Long orderId);
     
     OrderResponseDto cancelOrder(Long orderId);
+
+
 }

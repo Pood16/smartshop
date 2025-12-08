@@ -49,8 +49,7 @@ public class OrderServiceImpl implements OrderService {
         String promoCode = "";
 
         for (OrderItemRequestDto requestItem: requestDto.getOrderItems()){
-            Product product = productRepository
-                    .findById(requestItem.getProductId())
+            Product product = productRepository.findById(requestItem.getProductId())
                     .orElseThrow(()-> new ResourceNotFoundException("Product not Found"));
 
             if (product.isDeleted()){
@@ -129,8 +128,7 @@ public class OrderServiceImpl implements OrderService {
         for (OrderItem item : items) {
             item.setOrder(order);
         }
-        
-        // Reserve stock immediately when order is created
+
         for (OrderItem item : items) {
             Product product = item.getProduct();
             product.setAvailableStock(product.getAvailableStock() - item.getQuantity());
@@ -145,7 +143,8 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(readOnly = true)
     public OrderResponseDto getOrderById(Long id) {
-        Order order = orderRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Order Not Found"));
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Order Not Found"));
         return orderMapper.toResponseDto(order);
     }
 
@@ -171,10 +170,10 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<OrderResponseDto> orderHistorique(Long userId, Pageable pageable) {
-        Client client = clientRepository.findByUserId(userId)
+    public Page<OrderResponseDto> getOrdersByClient(Long clientId, Pageable pageable) {
+        Client client = clientRepository.findById(clientId)
                 .orElseThrow(() -> new ResourceNotFoundException("Client not Found"));
-        return orderRepository.findByClientId(client.getId(), pageable)
+        return orderRepository.findByClientId(clientId, pageable)
                 .map(orderMapper::toResponseDto);
     }
 
@@ -188,9 +187,6 @@ public class OrderServiceImpl implements OrderService {
         if (!order.canBeConfirmed()) {
             throw new ValidationException("Order cannot be confirmed. Must be PENDING and fully paid.");
         }
-
-
-        
 
         Client client = order.getClient();
         client.setTotalOrders(client.getTotalOrders() + 1);

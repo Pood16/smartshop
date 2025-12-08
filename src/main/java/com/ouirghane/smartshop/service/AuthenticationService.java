@@ -5,6 +5,8 @@ import com.ouirghane.smartshop.dto.response.LoginResponseDto;
 import com.ouirghane.smartshop.dto.response.UserResponseDto;
 import jakarta.servlet.http.HttpSession;
 
+import java.util.function.Function;
+
 public interface AuthenticationService {
     
     LoginResponseDto login(LoginRequestDto request, HttpSession session);
@@ -14,4 +16,5 @@ public interface AuthenticationService {
     UserResponseDto getCurrentUser(HttpSession session);
     
     boolean isAuthenticated(HttpSession session);
+
 }

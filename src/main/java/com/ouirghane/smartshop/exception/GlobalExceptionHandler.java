@@ -66,6 +66,18 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ErrorResponseDto> handleBusinessException(BusinessException ex, HttpServletRequest request) {
+        ErrorResponseDto error = ErrorResponseDto.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.CONFLICT.value())
+                .error("Business Rule Violation")
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .build();
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponseDto> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpServletRequest request) {
         List<ValidationErrorDto> validationErrors = ex.getBindingResult()
@@ -80,6 +92,7 @@ public class GlobalExceptionHandler {
                 .error("Validation Failed")
                 .message("Invalid input data")
                 .path(request.getRequestURI())
+                .validationErrors(validationErrors)
                 .build();
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);

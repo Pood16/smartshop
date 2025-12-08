@@ -6,6 +6,7 @@ import com.ouirghane.smartshop.dto.request.ProductUpdateRequestDto;
 import com.ouirghane.smartshop.dto.response.ProductResponseDto;
 import com.ouirghane.smartshop.entity.Product;
 import com.ouirghane.smartshop.exception.ResourceNotFoundException;
+import com.ouirghane.smartshop.exception.ValidationException;
 import com.ouirghane.smartshop.mapper.ProductMapper;
 import com.ouirghane.smartshop.repository.OrderItemRepository;
 import com.ouirghane.smartshop.repository.ProductRepository;
@@ -32,6 +33,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductResponseDto createProduct(ProductCreateRequestDto request){
+        if (productRepository.existsByName(request.getName())){
+            throw new ValidationException("Product name already exists");
+        }
         Product product = productMapper.toEntity(request);
         Product savedProduct = productRepository.save(product);
         return productMapper.toResponse(savedProduct);

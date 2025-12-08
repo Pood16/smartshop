@@ -27,6 +27,7 @@ public class SessionServiceImpl implements SessionService {
         return getAuthenticatedUser(session).getId();
     }
 
+
     @Override
     public UserRole getAuthenticatedUserRole(HttpSession session) {
         return getAuthenticatedUser(session).getRole();

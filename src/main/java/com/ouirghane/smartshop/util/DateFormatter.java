@@ -12,8 +12,7 @@ import java.time.format.DateTimeFormatter;
 public class DateFormatter {
 
     private static final String DATETIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
-    private static final LocalDateTimeSerializer LOCAL_DATETIME_SERIALIZER =
-            new LocalDateTimeSerializer(DateTimeFormatter.ofPattern(DATETIME_PATTERN));
+    private static final LocalDateTimeSerializer LOCAL_DATETIME_SERIALIZER = new LocalDateTimeSerializer(DateTimeFormatter.ofPattern(DATETIME_PATTERN));
 
 
     @Bean

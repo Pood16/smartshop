@@ -17,7 +17,10 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @Table(name = "payments")
-public class Payment extends BaseEntity {
+public class Payment{
+
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
@@ -69,5 +72,22 @@ public class Payment extends BaseEntity {
             return bankName != null && !bankName.trim().isEmpty();
         }
         return true;
+    }
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    public void onCreate(){
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void onUpdate(){
+        this.updatedAt = LocalDateTime.now();
     }
 }

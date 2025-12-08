@@ -13,8 +13,10 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @Table(name = "promo_codes")
-public class PromoCode extends BaseEntity {
+public class PromoCode{
 
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Long id;
     @Column(nullable = false, unique = true)
     private String code;
 
@@ -28,5 +30,23 @@ public class PromoCode extends BaseEntity {
 
     public boolean isUsable() {
         return active;
+    }
+
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    public void onCreate(){
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void onUpdate(){
+        this.updatedAt = LocalDateTime.now();
     }
 }

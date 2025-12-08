@@ -61,7 +61,7 @@ public class PaymentServiceImpl implements PaymentService {
         long nextNumber =  paymentRepository.countByOrderId(order.getId()) + 1;
         payment.setPaymentNumber((int) nextNumber);
 
-        validatePaymentTypeRules(payment, requestDto);
+        validatePaymentTypeRules(payment);
 
         if (payment.getPaymentType() == PaymentType.CASH) {
             payment.setStatus(PaymentStatus.COLLECTED);
@@ -139,20 +139,20 @@ public class PaymentServiceImpl implements PaymentService {
                 .map(paymentMapper::toResponseDto);
     }
 
-    private void validatePaymentTypeRules(Payment payment, PaymentCreateRequestDto dto) {
+    private void validatePaymentTypeRules(Payment payment) {
         switch (payment.getPaymentType()) {
             case CASH:
                 if (!payment.isCashAmountValid()) {
-                    throw new ValidationException("Cash payment cannot exceed 20,000 DH");
+                    throw new ValidationException("Cash payment cannot exceed 20000 DH");
                 }
                 break;
             case CHECK:
-                if (dto.getBankName() == null) {
-                    throw new ValidationException("Check payment requires bank name and due date");
+                if (!payment.isCheckPaymentValid()) {
+                    throw new ValidationException("Check payment requires bank name");
                 }
                 break;
             case TRANSFER:
-                if (dto.getBankName() == null || dto.getReferenceNumber() == null) {
+                if (!payment.isTransferPaymentValid()) {
                     throw new ValidationException("Transfer payment requires bank name and reference number");
                 }
                 break;

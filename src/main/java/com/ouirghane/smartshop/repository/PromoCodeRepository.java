@@ -14,9 +14,5 @@ import java.util.Optional;
 public interface PromoCodeRepository extends JpaRepository<PromoCode, Long>, JpaSpecificationExecutor<PromoCode> {
 
     Optional<PromoCode> findByCode(String code);
-    
-    boolean existsByCode(String code);
-    
-    Page<PromoCode> findByActiveTrue(Pageable pageable);
 
 }

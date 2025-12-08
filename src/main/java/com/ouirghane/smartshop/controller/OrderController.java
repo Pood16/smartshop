@@ -9,10 +9,8 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.repository.query.Param;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -67,11 +65,13 @@ public class OrderController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/me/history")
+    @GetMapping("/clients/{id}")
     public ResponseEntity<Page<OrderResponseDto>> myOrders(
             HttpSession session,
+            @PathVariable Long id,
             @PageableDefault(size = 1, sort = "orderDate", direction = Sort.Direction.DESC) Pageable pageable){
-        Page<OrderResponseDto> response = orderService.orderHistorique(sessionService.getAuthenticatedUserId(session) ,pageable);
+        sessionService.validateAdminRole(session);
+        Page<OrderResponseDto> response = orderService.getOrdersByClient(id ,pageable);
         return ResponseEntity.ok(response);
     }
 
