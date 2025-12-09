@@ -1,6 +1,7 @@
 package com.ouirghane.smartshop.config;
 
 import com.ouirghane.smartshop.security.CustomUserDetailsService;
+import com.ouirghane.smartshop.security.JwtAccessDeniedHandler;
 import com.ouirghane.smartshop.security.JwtAuthenticationEntryPoint;
 import com.ouirghane.smartshop.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final JwtAuthenticationEntryPoint jwtAuthEntryPoint;
+    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
     private final CustomUserDetailsService userDetailsService;
 
     @Bean
@@ -34,7 +36,9 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/login", "/api/clients").permitAll()
+                        .requestMatchers("/api/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/clients").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/products", "/api/products/**").authenticated()
                         .requestMatchers("/api/products/**").hasRole("ADMIN")
                         .requestMatchers("/api/clients/**").hasRole("ADMIN")
@@ -43,7 +47,10 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthEntryPoint))
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(jwtAuthEntryPoint)
+                        .accessDeniedHandler(jwtAccessDeniedHandler)
+                )
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
