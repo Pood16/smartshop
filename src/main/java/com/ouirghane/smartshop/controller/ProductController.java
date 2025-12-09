@@ -5,8 +5,6 @@ import com.ouirghane.smartshop.dto.request.ProductFilter;
 import com.ouirghane.smartshop.dto.request.ProductUpdateRequestDto;
 import com.ouirghane.smartshop.dto.response.ProductResponseDto;
 import com.ouirghane.smartshop.service.ProductService;
-import com.ouirghane.smartshop.service.SessionService;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,24 +23,19 @@ import java.math.BigDecimal;
 public class ProductController {
 
     private final ProductService productService;
-    private final SessionService sessionService;
 
     @PostMapping
     public ResponseEntity<ProductResponseDto> createProduct(
             @Valid
             @RequestBody
-            ProductCreateRequestDto request,
-            HttpSession session) {
-        sessionService.validateAdminRole(session);
+            ProductCreateRequestDto request) {
         ProductResponseDto response = productService.createProduct(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponseDto> getProductById(
-            @PathVariable Long id,
-            HttpSession session) {
-        sessionService.validateAuthentication(session);
+            @PathVariable Long id) {
         ProductResponseDto response = productService.getProductById(id);
         return ResponseEntity.ok(response);
     }
@@ -57,9 +50,7 @@ public class ProductController {
             @RequestParam(required = false) Integer maxStock,
             @RequestParam(required = false) Boolean deletedStatus,
             @RequestParam(required = false) Boolean inStock,
-            @PageableDefault(size = 20, sort = "name", direction = Sort.Direction.ASC) Pageable pageable,
-            HttpSession session) {
-        sessionService.validateAuthentication(session);
+            @PageableDefault(size = 20, sort = "name", direction = Sort.Direction.ASC) Pageable pageable) {
         ProductFilter filter = ProductFilter
                 .builder()
                 .name(name)
@@ -79,18 +70,14 @@ public class ProductController {
             @PathVariable Long id,
             @Valid
             @RequestBody
-            ProductUpdateRequestDto request,
-            HttpSession session) {
-        sessionService.validateAdminRole(session);
+            ProductUpdateRequestDto request) {
         ProductResponseDto response = productService.updateProduct(id, request);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(
-            @PathVariable Long id,
-            HttpSession session) {
-        sessionService.validateAdminRole(session);
+            @PathVariable Long id) {
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }
