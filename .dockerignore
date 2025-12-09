@@ -1,7 +1,0 @@
-target/
-.mvn/
-*.log
-.git/
-.idea/
-*.iml
-docs
